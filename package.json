@@ -10,7 +10,32 @@
     "version": "0.14.5",
     "homepage": "https://waveterm.dev",
     "build": {
-        "appId": "dev.commandline.waveterm"
+        "appId": "dev.commandline.waveterm",
+        "asar": true,
+        "asarUnpack": [
+            "dist/bin/**"
+        ],
+        "files": [
+            "dist/**/*",
+            "index.html",
+            "frontend/**/*",
+            "emain/**/*",
+            "node_modules/**/*",
+            "package.json"
+        ],
+        "mac": {
+            "target": [
+                {
+                    "target": "dmg",
+                    "arch": ["arm64"]
+                }
+            ],
+            "category": "public.app-category.developer-tools",
+            "hardenedRuntime": true
+        },
+        "directories": {
+            "output": "dist-electron"
+        }
     },
     "private": true,
     "main": "./dist/main/index.js",

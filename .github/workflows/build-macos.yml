@@ -12,6 +12,9 @@ on:
           - dev
           - prod
 
+env:
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
 jobs:
   build-macos:
     runs-on: macos-latest
@@ -22,11 +25,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Download upstream Go binaries from release
+        run: |
+          mkdir -p dist/bin
+          curl -sL "https://github.com/wavetermdev/waveterm/releases/download/v0.14.5/Wave-darwin-arm64-0.14.5.zip" -o /tmp/wave-upstream.zip
+          unzip -j /tmp/wave-upstream.zip "Wave.app/Contents/Resources/app.asar.unpacked/dist/bin/*" -d dist/bin/
+          chmod +x dist/bin/*
+          echo "--- Binaries downloaded ---"
+          ls -la dist/bin/
 
       - name: Build frontend
         run: |
@@ -37,13 +49,13 @@ jobs:
           fi
 
       - name: Build DMG
-        run: npx electron-builder --mac dmg
+        run: npx electron-builder --mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WaveTerm-macOS-DMG
-          path: dist/*.dmg
+          name: WaveTerm-i18n-macOS-DMG-arm64
+          path: dist-electron/*.dmg
           retention-days: 7
