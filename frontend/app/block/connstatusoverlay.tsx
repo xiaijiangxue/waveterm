@@ -4,6 +4,7 @@
 import { Button } from "@/app/element/button";
 import { CopyButton } from "@/app/element/copybutton";
 import { useDimensionsWithCallbackRef } from "@/app/hook/useDimensions";
+import i18n from "@/app/i18n";
 import { TabRpcClient } from "@/app/store/wshrpcutil";
 import { useWaveEnv } from "@/app/waveenv/waveenv";
 import { NodeModel } from "@/layout/index";
@@ -12,6 +13,7 @@ import clsx from "clsx";
 import * as jotai from "jotai";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { BlockEnv } from "./blockenv";
 
 function formatElapsedTime(elapsedMs: number): string {
@@ -40,7 +42,7 @@ function formatElapsedTime(elapsedMs: number): string {
         return `${elapsedHours}h${remainingMinutes}m`;
     }
 
-    return "more than a day";
+    return i18n.t("connection.moreThanADay");
 }
 
 const StalledOverlay = React.memo(
@@ -53,6 +55,7 @@ const StalledOverlay = React.memo(
         connStatus: ConnStatus;
         overlayRefCallback: (el: HTMLDivElement | null) => void;
     }) => {
+        const { t } = useTranslation();
         const [elapsedTime, setElapsedTime] = React.useState<string>("");
 
         const waveEnv = useWaveEnv<BlockEnv>();
@@ -87,19 +90,19 @@ const StalledOverlay = React.memo(
                 <div className="flex items-center gap-3 w-full pt-2.5 pb-2.5 pr-2 pl-3">
                     <i
                         className="fa-solid fa-triangle-exclamation text-warning text-base shrink-0"
-                        title="Connection Stalled"
+                        title={t("connection.stalledTitle")}
                     ></i>
                     <div className="text-[11px] font-semibold leading-4 tracking-[0.11px] text-white min-w-0 flex-1 break-words @max-xxs:hidden">
-                        Connection to "{connName}" is stalled
-                        {elapsedTime && ` (no activity for ${elapsedTime})`}
+                        {t("connection.stalledMessage", { name: connName })}
+                        {elapsedTime && " " + t("connection.stalledNoActivity", { duration: elapsedTime })}
                     </div>
                     <div className="flex-1 hidden @max-xxs:block"></div>
                     <Button
                         className="outlined grey text-[11px] py-[3px] px-[7px] @max-w350:text-[12px] @max-w350:py-[5px] @max-w350:px-[6px]"
                         onClick={handleDisconnect}
-                        title="Disconnect"
+                        title={t("connection.disconnectLabel")}
                     >
-                        <span className="@max-w350:hidden!">Disconnect</span>
+                        <span className="@max-w350:hidden!">{t("connection.disconnectLabel")}</span>
                         <i className="fa-solid fa-link-slash hidden! @max-w350:inline!"></i>
                     </Button>
                 </div>
@@ -119,6 +122,7 @@ export const ConnStatusOverlay = React.memo(
         viewModel: ViewModel;
         changeConnModalAtom: jotai.PrimitiveAtom<boolean>;
     }) => {
+        const { t } = useTranslation();
         const waveEnv = useWaveEnv<BlockEnv>();
         const connName = jotai.useAtomValue(waveEnv.getBlockMetaKeyAtom(nodeModel.blockId, "connection"));
         const [connModalOpen] = jotai.useAtom(changeConnModalAtom);
@@ -171,10 +175,10 @@ export const ConnStatusOverlay = React.memo(
             }
         }, [connName, waveEnv]);
 
-        let statusText = `Disconnected from "${connName}"`;
+        let statusText = t("connection.disconnectedFrom", { name: connName });
         let showReconnect = true;
         if (connStatus.status == "connecting") {
-            statusText = `Connecting to "${connName}"...`;
+            statusText = t("connection.connectingTo", { name: connName }) + "...";
             showReconnect = false;
         }
         if (connStatus.status == "connected") {
@@ -186,7 +190,7 @@ export const ConnStatusOverlay = React.memo(
             reconDisplay = <i className="fa-sharp fa-solid fa-rotate-right"></i>;
             reconClassName = clsx(reconClassName, "text-[12px] py-[5px] px-[6px]");
         } else {
-            reconDisplay = "Reconnect";
+            reconDisplay = t("connection.reconnect");
             reconClassName = clsx(reconClassName, "text-[11px] py-[3px] px-[7px]");
         }
         const showIcon = connStatus.status != "connecting";
@@ -239,14 +243,14 @@ export const ConnStatusOverlay = React.memo(
                                     className="connstatus-error"
                                     options={{ scrollbars: { autoHide: "leave" } }}
                                 >
-                                    <CopyButton className="copy-button" onClick={handleCopy} title="Copy" />
+                                    <CopyButton className="copy-button" onClick={handleCopy} title={t("common.copy")} />
                                     {showError ? <div>error: {connStatus.error}</div> : null}
                                     {showWshError ? <div>unable to use wsh: {connStatus.wsherror}</div> : null}
                                 </OverlayScrollbarsComponent>
                             )}
                             {showWshError && (
                                 <Button className={reconClassName} onClick={handleDisableWsh}>
-                                    always disable wsh
+                                    {t("connection.alwaysDisableWsh")}
                                 </Button>
                             )}
                         </div>

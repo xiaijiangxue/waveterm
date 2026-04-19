@@ -1,10 +1,12 @@
 // Copyright 2026, Command Line Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+import i18n from "@/app/i18n";
 import { Tooltip } from "@/element/tooltip";
 import { WaveEnv, WaveEnvSubset, useWaveEnv } from "@/app/waveenv/waveenv";
 import { useAtomValue } from "jotai";
 import { memo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 
 type UpdateBannerEnv = WaveEnvSubset<{
     electron: {
@@ -18,17 +20,18 @@ type UpdateBannerEnv = WaveEnvSubset<{
 function getUpdateStatusMessage(status: string): string {
     switch (status) {
         case "ready":
-            return "Update";
+            return i18n.t("update.update");
         case "downloading":
-            return "Downloading";
+            return i18n.t("update.downloading");
         case "installing":
-            return "Installing";
+            return i18n.t("update.installing");
         default:
             return null;
     }
 }
 
 const UpdateStatusBannerComponent = () => {
+    const { t } = useTranslation();
     const env = useWaveEnv<UpdateBannerEnv>();
     const appUpdateStatus = useAtomValue(env.atoms.updaterStatusAtom);
     const updateStatusMessage = getUpdateStatusMessage(appUpdateStatus);
@@ -42,7 +45,7 @@ const UpdateStatusBannerComponent = () => {
     }
 
     const isReady = appUpdateStatus === "ready";
-    const tooltipContent = isReady ? "Click to Install Update" : updateStatusMessage;
+    const tooltipContent = isReady ? t("update.clickToInstall") : updateStatusMessage;
 
     return (
         <Tooltip

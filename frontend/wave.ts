@@ -35,6 +35,7 @@ import { setKeyUtilPlatform } from "@/util/keyutil";
 import { isMacOS, setMacOSVersion } from "@/util/platformutil";
 import { createElement } from "react";
 import { createRoot } from "react-dom/client";
+import "@/app/i18n";
 
 const platform = getApi().getPlatform();
 document.title = `Wave Terminal`;
